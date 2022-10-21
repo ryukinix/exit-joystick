@@ -1,11 +1,13 @@
 #include <cstdio>
 #include <string>
 #include <vector>
-#include <SDL.h>
+#include <iostream>
+#include <SDL2/SDL.h>
 
+#define POLLING_DELAY 50
 #define EXIT_BUTTON 9
 
-int main(int argc, char* argv[]) {
+int main(void) {
 
     bool quit = false;
     bool deviceFound = false;
@@ -48,12 +50,16 @@ int main(int argc, char* argv[]) {
             else if (e.type == SDL_JOYDEVICEREMOVED) {
                 auto joystick = SDL_JoystickFromInstanceID(e.jdevice.which);
                 SDL_JoystickClose(joystick);
+                std::cout << "Joystick removed: " << SDL_JoystickName(joystick);
             }
             else if (e.type == SDL_JOYBUTTONDOWN) {
                 activeJoystick = SDL_JoystickFromInstanceID(e.jbutton.which);
                 deviceFound = true;
+                auto name = SDL_JoystickName(activeJoystick);
+                std::cout << "Joystick selected: " << name << "<" << e.jbutton.which << ">" << std::endl;
             }
         }
+        SDL_Delay(POLLING_DELAY);
     }
 
     // Stop listening to all other joysticks;
@@ -74,13 +80,13 @@ int main(int argc, char* argv[]) {
                 quit = true;
             }
             else if (e.type == SDL_JOYBUTTONUP) {
-                if (e.jbutton.button == EXIT_BUTTON) { // start on xbox 360 controller
-                    printf("QUIT!");
+                if (e.jbutton.button == EXIT_BUTTON) {
+                    printf("QUIT!\n");
                     quit = true;
                 }
             }
-
         }
+        SDL_Delay(POLLING_DELAY);
     }
 
     SDL_JoystickClose(activeJoystick);
